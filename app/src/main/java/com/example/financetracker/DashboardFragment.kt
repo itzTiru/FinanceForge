@@ -25,17 +25,13 @@ class DashboardFragment : Fragment() {
 
         // Click listener for Add Expense button
         addExpenseButton.setOnClickListener {
-            val intent = Intent(requireContext(), AddTransactionActivity::class.java).apply {
-                putExtra("TRANSACTION_TYPE", "expense")
-            }
+            val intent = Intent(requireContext(), AddExpenseActivity::class.java)
             startActivity(intent)
         }
 
         // Click listener for Add Income button
         addIncomeButton.setOnClickListener {
-            val intent = Intent(requireContext(), AddTransactionActivity::class.java).apply {
-                putExtra("TRANSACTION_TYPE", "income")
-            }
+            val intent = Intent(requireContext(), AddIncomeActivity::class.java)
             startActivity(intent)
         }
     }
