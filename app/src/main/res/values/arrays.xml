@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string-array name="date_filters">
+        <item>All Time</item>
+        <item>This Month</item>
+        <item>This Week</item>
+        <item>Today</item>
+    </string-array>
+
+
+
+</resources>
