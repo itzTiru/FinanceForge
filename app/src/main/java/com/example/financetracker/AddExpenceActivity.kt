@@ -15,13 +15,13 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.decodeFromString
 
 @Serializable
-data class Income(val amount: String, val category: String, val date: String)
+data class Expense(val amount: String, val category: String, val date: String)
 
-class AddIncomeActivity : AppCompatActivity() {
+class AddExpenseActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_add_income)
+        setContentView(R.layout.activity_add_expense)
 
         // References to UI elements
         val exitButton: ImageButton = findViewById(R.id.exit_button)
@@ -32,28 +32,28 @@ class AddIncomeActivity : AppCompatActivity() {
         val successMessage: TextView = findViewById(R.id.success_message)
 
         // Initialize SharedPreferences
-        val sharedPreferences = getSharedPreferences("IncomePrefs", Context.MODE_PRIVATE)
+        val sharedPreferences = getSharedPreferences("ExpensePrefs", Context.MODE_PRIVATE)
         val editor = sharedPreferences.edit()
 
-        // Load and display all incomes (if any)
-        val savedIncomesJson = sharedPreferences.getString("incomes", null)
-        val incomes: MutableList<Income> = if (savedIncomesJson != null) {
+        // Load and display all expenses (if any)
+        val savedExpensesJson = sharedPreferences.getString("expenses", null)
+        val expenses: MutableList<Expense> = if (savedExpensesJson != null) {
             try {
-                Json.decodeFromString(savedIncomesJson)
+                Json.decodeFromString(savedExpensesJson)
             } catch (e: Exception) {
                 mutableListOf()
             }
         } else {
             mutableListOf()
         }
-        if (incomes.isNotEmpty()) {
+        if (expenses.isNotEmpty()) {
             val displayText = buildString {
-                append("Recent Incomes:\n")
-                incomes.take(3).forEachIndexed { index, income ->
-                    append("Income ${index + 1}:\n")
-                    append("Amount: $${income.amount}\n")
-                    append("Category: ${income.category}\n")
-                    append("Date: ${income.date}\n\n")
+                append("Recent Expenses:\n")
+                expenses.take(3).forEachIndexed { index, expense ->
+                    append("Expense ${index + 1}:\n")
+                    append("Amount: $${expense.amount}\n")
+                    append("Category: ${expense.category}\n")
+                    append("Date: ${expense.date}\n\n")
                 }
             }
             successMessage.text = displayText
@@ -64,8 +64,8 @@ class AddIncomeActivity : AppCompatActivity() {
             finish() // Close the activity and return to Dashboard
         }
 
-        // Set up the category dropdown (income-specific categories)
-        val categories = listOf("Salary", "Freelance", "Gift", "Investment", "Other")
+        // Set up the category dropdown (expense-specific categories)
+        val categories = listOf("Food", "Transport", "Entertainment", "Bills", "Other")
         val adapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, categories)
         categoryDropdown.setAdapter(adapter)
 
@@ -101,28 +101,28 @@ class AddIncomeActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            // Add new income to the list
-            val newIncome = Income(amount, category, date)
-            incomes.add(0, newIncome) // Add to the beginning for newest first
+            // Add new expense to the list
+            val newExpense = Expense(amount, category, date)
+            expenses.add(0, newExpense) // Add to the beginning for newest first
 
-            // Save the updated incomes list to SharedPreferences
-            val incomesJson = Json.encodeToString(incomes)
-            editor.putString("incomes", incomesJson)
+            // Save the updated expenses list to SharedPreferences
+            val expensesJson = Json.encodeToString(expenses)
+            editor.putString("expenses", expensesJson)
             editor.apply()
 
-            // Display success message and updated income list
+            // Display success message and updated expense list
             val displayText = buildString {
-                append("Income added successfully\n\n")
-                append("Recent Incomes:\n")
-                incomes.take(3).forEachIndexed { index, income ->
-                    append("Income ${index + 1}:\n")
-                    append("Amount: $${income.amount}\n")
-                    append("Category: ${income.category}\n")
-                    append("Date: ${income.date}\n\n")
+                append("Expense added successfully\n\n")
+                append("Recent Expenses:\n")
+                expenses.take(3).forEachIndexed { index, expense ->
+                    append("Expense ${index + 1}:\n")
+                    append("Amount: $${expense.amount}\n")
+                    append("Category: ${expense.category}\n")
+                    append("Date: ${expense.date}\n\n")
                 }
             }
             successMessage.text = displayText
-            successMessage.setTextColor(getColor(R.color.green)) // Match the green color used in the layout (#388E3C)
+            successMessage.setTextColor(getColor(R.color.red)) // Match the red color used in the layout (#D32F2F)
 
             // Clear the input fields
             amountInput.text?.clear()
