@@ -31,11 +31,11 @@
         android:fontFamily="sans-serif-medium"
         android:text="Add Income"
         android:textColor="#388E3C"
-    android:textSize="24sp"
-    android:textStyle="bold"
-    app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toTopOf="parent"
-    app:layout_constraintEnd_toStartOf="@id/exit_button" />
+        android:textSize="24sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/exit_button" />
 
     <!-- Amount Input -->
     <com.google.android.material.textfield.TextInputLayout
@@ -97,6 +97,28 @@
             android:textSize="16sp" />
     </com.google.android.material.textfield.TextInputLayout>
 
+    <!-- Description Input (Optional) -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/description_input_layout"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:hint="Description (Optional)"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/date_input_layout">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/description_input"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textMultiLine"
+            android:minLines="2"
+            android:maxLines="4"
+            android:textColor="#333333"
+            android:textSize="16sp" />
+    </com.google.android.material.textfield.TextInputLayout>
+
     <!-- Save Button -->
     <Button
         android:id="@+id/save_button"
@@ -110,7 +132,7 @@
         android:textSize="16sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/date_input_layout" />
+        app:layout_constraintTop_toBottomOf="@id/description_input_layout" />
 
     <!-- Success Message and Income Details -->
     <TextView
@@ -121,9 +143,9 @@
         android:fontFamily="sans-serif-medium"
         android:text=""
         android:textColor="#388E3C"
-    android:textSize="16sp"
-    app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toBottomOf="@id/save_button" />
+        android:textSize="16sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/save_button" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

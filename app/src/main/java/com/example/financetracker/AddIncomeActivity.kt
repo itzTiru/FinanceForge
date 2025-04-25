@@ -15,7 +15,7 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.decodeFromString
 
 @Serializable
-data class Income(val amount: String, val category: String, val date: String)
+data class Income(val amount: String, val category: String, val date: String, val description: String? = null)
 
 class AddIncomeActivity : AppCompatActivity() {
 
@@ -28,6 +28,7 @@ class AddIncomeActivity : AppCompatActivity() {
         val amountInput: TextInputEditText = findViewById(R.id.amount_input)
         val categoryDropdown: AutoCompleteTextView = findViewById(R.id.category_dropdown)
         val dateInput: TextInputEditText = findViewById(R.id.date_input)
+        val descriptionInput: TextInputEditText = findViewById(R.id.description_input)
         val saveButton: Button = findViewById(R.id.save_button)
         val successMessage: TextView = findViewById(R.id.success_message)
 
@@ -53,7 +54,11 @@ class AddIncomeActivity : AppCompatActivity() {
                     append("Income ${index + 1}:\n")
                     append("Amount: $${income.amount}\n")
                     append("Category: ${income.category}\n")
-                    append("Date: ${income.date}\n\n")
+                    append("Date: ${income.date}\n")
+                    if (!income.description.isNullOrEmpty()) {
+                        append("Description: ${income.description}\n")
+                    }
+                    append("\n")
                 }
             }
             successMessage.text = displayText
@@ -86,10 +91,11 @@ class AddIncomeActivity : AppCompatActivity() {
             val amount = amountInput.text.toString()
             val category = categoryDropdown.text.toString()
             val date = dateInput.text.toString()
+            val description = descriptionInput.text.toString().ifEmpty { null }
 
             // Basic validation
             if (amount.isEmpty() || category.isEmpty() || date.isEmpty()) {
-                successMessage.text = "Error: Please fill in all fields"
+                successMessage.text = "Error: Please fill in all required fields"
                 successMessage.setTextColor(getColor(android.R.color.holo_red_dark))
                 return@setOnClickListener
             }
@@ -102,7 +108,7 @@ class AddIncomeActivity : AppCompatActivity() {
             }
 
             // Add new income to the list
-            val newIncome = Income(amount, category, date)
+            val newIncome = Income(amount, category, date, description)
             incomes.add(0, newIncome) // Add to the beginning for newest first
 
             // Save the updated incomes list to SharedPreferences
@@ -118,7 +124,11 @@ class AddIncomeActivity : AppCompatActivity() {
                     append("Income ${index + 1}:\n")
                     append("Amount: $${income.amount}\n")
                     append("Category: ${income.category}\n")
-                    append("Date: ${income.date}\n\n")
+                    append("Date: ${income.date}\n")
+                    if (!income.description.isNullOrEmpty()) {
+                        append("Description: ${income.description}\n")
+                    }
+                    append("\n")
                 }
             }
             successMessage.text = displayText
@@ -128,6 +138,7 @@ class AddIncomeActivity : AppCompatActivity() {
             amountInput.text?.clear()
             categoryDropdown.text?.clear()
             dateInput.text?.clear()
+            descriptionInput.text?.clear()
         }
     }
 }

@@ -15,7 +15,7 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.decodeFromString
 
 @Serializable
-data class Expense(val amount: String, val category: String, val date: String)
+data class Expense(val amount: String, val category: String, val date: String, val description: String? = null)
 
 class AddExpenseActivity : AppCompatActivity() {
 
@@ -28,6 +28,7 @@ class AddExpenseActivity : AppCompatActivity() {
         val amountInput: TextInputEditText = findViewById(R.id.amount_input)
         val categoryDropdown: AutoCompleteTextView = findViewById(R.id.category_dropdown)
         val dateInput: TextInputEditText = findViewById(R.id.date_input)
+        val descriptionInput: TextInputEditText = findViewById(R.id.description_input)
         val saveButton: Button = findViewById(R.id.save_button)
         val successMessage: TextView = findViewById(R.id.success_message)
 
@@ -53,7 +54,11 @@ class AddExpenseActivity : AppCompatActivity() {
                     append("Expense ${index + 1}:\n")
                     append("Amount: $${expense.amount}\n")
                     append("Category: ${expense.category}\n")
-                    append("Date: ${expense.date}\n\n")
+                    append("Date: ${expense.date}\n")
+                    if (!expense.description.isNullOrEmpty()) {
+                        append("Description: ${expense.description}\n")
+                    }
+                    append("\n")
                 }
             }
             successMessage.text = displayText
@@ -65,7 +70,7 @@ class AddExpenseActivity : AppCompatActivity() {
         }
 
         // Set up the category dropdown (expense-specific categories)
-        val categories = listOf("Food", "Transport", "Entertainment", "Bills", "Other")
+        val categories = listOf("Groceries", "Bills", "Transport", "Entertainment", "Other")
         val adapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, categories)
         categoryDropdown.setAdapter(adapter)
 
@@ -86,10 +91,11 @@ class AddExpenseActivity : AppCompatActivity() {
             val amount = amountInput.text.toString()
             val category = categoryDropdown.text.toString()
             val date = dateInput.text.toString()
+            val description = descriptionInput.text.toString().ifEmpty { null }
 
             // Basic validation
             if (amount.isEmpty() || category.isEmpty() || date.isEmpty()) {
-                successMessage.text = "Error: Please fill in all fields"
+                successMessage.text = "Error: Please fill in all required fields"
                 successMessage.setTextColor(getColor(android.R.color.holo_red_dark))
                 return@setOnClickListener
             }
@@ -102,7 +108,7 @@ class AddExpenseActivity : AppCompatActivity() {
             }
 
             // Add new expense to the list
-            val newExpense = Expense(amount, category, date)
+            val newExpense = Expense(amount, category, date, description)
             expenses.add(0, newExpense) // Add to the beginning for newest first
 
             // Save the updated expenses list to SharedPreferences
@@ -118,16 +124,21 @@ class AddExpenseActivity : AppCompatActivity() {
                     append("Expense ${index + 1}:\n")
                     append("Amount: $${expense.amount}\n")
                     append("Category: ${expense.category}\n")
-                    append("Date: ${expense.date}\n\n")
+                    append("Date: ${expense.date}\n")
+                    if (!expense.description.isNullOrEmpty()) {
+                        append("Description: ${expense.description}\n")
+                    }
+                    append("\n")
                 }
             }
             successMessage.text = displayText
-            successMessage.setTextColor(getColor(R.color.red)) // Match the red color used in the layout (#D32F2F)
+            successMessage.setTextColor(getColor(R.color.green)) // Match the green color used in the layout (#388E3C)
 
             // Clear the input fields
             amountInput.text?.clear()
             categoryDropdown.text?.clear()
             dateInput.text?.clear()
+            descriptionInput.text?.clear()
         }
     }
 }
