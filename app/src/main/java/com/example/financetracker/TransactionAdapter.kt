@@ -7,8 +7,9 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
-class TransactionAdapter(private val transactions: List<Transaction>) :
-    RecyclerView.Adapter<TransactionAdapter.TransactionViewHolder>() {
+class TransactionAdapter : RecyclerView.Adapter<TransactionAdapter.TransactionViewHolder>() {
+
+    private var transactions: List<Transaction> = emptyList()
 
     class TransactionViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val icon: ImageView = itemView.findViewById(R.id.transaction_icon)
@@ -30,7 +31,6 @@ class TransactionAdapter(private val transactions: List<Transaction>) :
                 val income = transaction.income
                 holder.title.text = income.category
                 holder.date.text = income.date
-                // Format amount as a number, assuming it's a valid number string
                 val amountValue = income.amount.toDoubleOrNull() ?: 0.0
                 holder.amount.text = "+ $${String.format("%.2f", amountValue)}"
                 holder.amount.setTextColor(
@@ -42,7 +42,6 @@ class TransactionAdapter(private val transactions: List<Transaction>) :
                 val expense = transaction.expense
                 holder.title.text = expense.category
                 holder.date.text = expense.date
-                // Format amount as a number, assuming it's a valid number string
                 val amountValue = expense.amount.toDoubleOrNull() ?: 0.0
                 holder.amount.text = "- $${String.format("%.2f", amountValue)}"
                 holder.amount.setTextColor(
@@ -54,4 +53,10 @@ class TransactionAdapter(private val transactions: List<Transaction>) :
     }
 
     override fun getItemCount(): Int = transactions.size
+
+    // Function to update the transactions list and refresh the RecyclerView
+    fun updateTransactions(newTransactions: List<Transaction>) {
+        transactions = newTransactions
+        notifyDataSetChanged()
+    }
 }

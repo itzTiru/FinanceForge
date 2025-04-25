@@ -84,6 +84,10 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:hint="Date (DD/MM/YYYY)"
+        app:endIconMode="custom"
+        app:endIconDrawable="@drawable/ic_calendar"
+        app:endIconTint="#3F51B5"
+        app:endIconContentDescription="Select date"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/category_input_layout">
@@ -92,7 +96,8 @@
             android:id="@+id/date_input"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="date"
+            android:inputType="none"
+            android:focusable="false"
             android:textColor="#333333"
             android:textSize="16sp" />
     </com.google.android.material.textfield.TextInputLayout>

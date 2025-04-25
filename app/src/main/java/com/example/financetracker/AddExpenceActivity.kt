@@ -1,5 +1,6 @@
 package com.example.financetracker
 
+import android.app.DatePickerDialog
 import android.content.Context
 import android.os.Bundle
 import android.widget.ArrayAdapter
@@ -9,15 +10,20 @@ import android.widget.ImageButton
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.textfield.TextInputEditText
+import com.google.android.material.textfield.TextInputLayout
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.decodeFromString
+import java.text.SimpleDateFormat
+import java.util.*
 
 @Serializable
 data class Expense(val amount: String, val category: String, val date: String, val description: String? = null)
 
 class AddExpenseActivity : AppCompatActivity() {
+
+    private val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -28,6 +34,7 @@ class AddExpenseActivity : AppCompatActivity() {
         val amountInput: TextInputEditText = findViewById(R.id.amount_input)
         val categoryDropdown: AutoCompleteTextView = findViewById(R.id.category_dropdown)
         val dateInput: TextInputEditText = findViewById(R.id.date_input)
+        val dateInputLayout: TextInputLayout = findViewById(R.id.date_input_layout)
         val descriptionInput: TextInputEditText = findViewById(R.id.description_input)
         val saveButton: Button = findViewById(R.id.save_button)
         val successMessage: TextView = findViewById(R.id.success_message)
@@ -35,6 +42,31 @@ class AddExpenseActivity : AppCompatActivity() {
         // Initialize SharedPreferences
         val sharedPreferences = getSharedPreferences("ExpensePrefs", Context.MODE_PRIVATE)
         val editor = sharedPreferences.edit()
+
+        // Set default date to today
+        val today = Calendar.getInstance()
+        dateInput.setText(dateFormat.format(today.time))
+
+        // Set up DatePickerDialog
+        val datePickerDialog = DatePickerDialog(
+            this,
+            { _, year, month, dayOfMonth ->
+                val selectedDate = Calendar.getInstance()
+                selectedDate.set(year, month, dayOfMonth)
+                dateInput.setText(dateFormat.format(selectedDate.time))
+            },
+            today.get(Calendar.YEAR),
+            today.get(Calendar.MONTH),
+            today.get(Calendar.DAY_OF_MONTH)
+        )
+
+        // Show DatePickerDialog when date input or calendar icon is clicked
+        dateInputLayout.setEndIconOnClickListener {
+            datePickerDialog.show()
+        }
+        dateInput.setOnClickListener {
+            datePickerDialog.show()
+        }
 
         // Load and display all expenses (if any)
         val savedExpensesJson = sharedPreferences.getString("expenses", null)
@@ -107,6 +139,23 @@ class AddExpenseActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
+            // Additional validation: Ensure amount is a valid positive number
+            if (amount.toDoubleOrNull() == null || amount.toDouble() <= 0) {
+                successMessage.text = "Error: Please enter a valid positive number for amount"
+                successMessage.setTextColor(getColor(android.R.color.holo_red_dark))
+                return@setOnClickListener
+            }
+
+            // Additional validation: Ensure date is valid
+            try {
+                dateFormat.isLenient = false
+                dateFormat.parse(date)
+            } catch (e: Exception) {
+                successMessage.text = "Error: Please enter a valid date (DD/MM/YYYY)"
+                successMessage.setTextColor(getColor(android.R.color.holo_red_dark))
+                return@setOnClickListener
+            }
+
             // Add new expense to the list
             val newExpense = Expense(amount, category, date, description)
             expenses.add(0, newExpense) // Add to the beginning for newest first
@@ -137,7 +186,7 @@ class AddExpenseActivity : AppCompatActivity() {
             // Clear the input fields
             amountInput.text?.clear()
             categoryDropdown.text?.clear()
-            dateInput.text?.clear()
+            dateInput.setText(dateFormat.format(today.time)) // Reset to today's date
             descriptionInput.text?.clear()
         }
     }

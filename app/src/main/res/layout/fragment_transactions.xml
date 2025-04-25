@@ -20,6 +20,256 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <!-- Filter Buttons -->
+    <LinearLayout
+        android:id="@+id/filter_buttons"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        android:orientation="horizontal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/title_text">
+
+        <!-- Income Filter Button -->
+        <Button
+            android:id="@+id/income_filter_button"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_marginEnd="8dp"
+            android:layout_weight="1"
+            android:backgroundTint="#388E3C"
+            android:fontFamily="sans-serif-medium"
+            android:text="Income"
+            android:textColor="#FFFFFF"
+            android:textSize="14sp" />
+
+        <!-- Expenses Filter Button -->
+        <Button
+            android:id="@+id/expenses_filter_button"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_marginStart="8dp"
+            android:layout_weight="1"
+            android:backgroundTint="#D32F2F"
+            android:fontFamily="sans-serif-medium"
+            android:text="Expenses"
+            android:textColor="#FFFFFF"
+            android:textSize="14sp" />
+    </LinearLayout>
+
+    <!-- Income Category Buttons (Visible when Income filter is active) -->
+    <HorizontalScrollView
+        android:id="@+id/income_category_scroll"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/filter_buttons">
+
+        <LinearLayout
+            android:id="@+id/income_category_buttons"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="16dp"
+            android:orientation="horizontal"
+            android:visibility="gone">
+
+            <Button
+                android:id="@+id/income_all_button"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:layout_marginEnd="4dp"
+                android:minWidth="100dp"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:backgroundTint="#B0BEC5"
+                android:fontFamily="sans-serif-medium"
+                android:text="All"
+                android:textColor="#FFFFFF"
+                android:textSize="14sp" />
+
+            <Button
+                android:id="@+id/income_salary_button"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:layout_marginEnd="4dp"
+                android:minWidth="100dp"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:backgroundTint="#B0BEC5"
+                android:fontFamily="sans-serif-medium"
+                android:text="Salary"
+                android:textColor="#FFFFFF"
+                android:textSize="14sp" />
+
+            <Button
+                android:id="@+id/income_freelance_button"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:layout_marginEnd="4dp"
+                android:minWidth="100dp"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:backgroundTint="#B0BEC5"
+                android:fontFamily="sans-serif-medium"
+                android:text="Freelance"
+                android:textColor="#FFFFFF"
+                android:textSize="14sp" />
+
+            <Button
+                android:id="@+id/income_gift_button"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:layout_marginEnd="4dp"
+                android:minWidth="100dp"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:backgroundTint="#B0BEC5"
+                android:fontFamily="sans-serif-medium"
+                android:text="Gift"
+                android:textColor="#FFFFFF"
+                android:textSize="14sp" />
+
+            <Button
+                android:id="@+id/income_investment_button"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:layout_marginEnd="4dp"
+                android:minWidth="100dp"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:backgroundTint="#B0BEC5"
+                android:fontFamily="sans-serif-medium"
+                android:text="Investment"
+                android:textColor="#FFFFFF"
+                android:textSize="14sp" />
+
+            <Button
+                android:id="@+id/income_other_button"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:layout_marginEnd="4dp"
+                android:minWidth="100dp"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:backgroundTint="#B0BEC5"
+                android:fontFamily="sans-serif-medium"
+                android:text="Other"
+                android:textColor="#FFFFFF"
+                android:textSize="14sp" />
+        </LinearLayout>
+    </HorizontalScrollView>
+
+    <!-- Expense Category Buttons (Visible when Expense filter is active) -->
+    <HorizontalScrollView
+        android:id="@+id/expense_category_scroll"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/income_category_scroll">
+
+        <LinearLayout
+            android:id="@+id/expense_category_buttons"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="16dp"
+            android:orientation="horizontal"
+            android:visibility="gone">
+
+            <Button
+                android:id="@+id/expense_all_button"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:layout_marginEnd="4dp"
+                android:minWidth="100dp"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:backgroundTint="#B0BEC5"
+                android:fontFamily="sans-serif-medium"
+                android:text="All"
+                android:textColor="#FFFFFF"
+                android:textSize="14sp" />
+
+            <Button
+                android:id="@+id/expense_groceries_button"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:layout_marginEnd="4dp"
+                android:minWidth="100dp"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:backgroundTint="#B0BEC5"
+                android:fontFamily="sans-serif-medium"
+                android:text="Groceries"
+                android:textColor="#FFFFFF"
+                android:textSize="14sp" />
+
+            <Button
+                android:id="@+id/expense_bills_button"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:layout_marginEnd="4dp"
+                android:minWidth="100dp"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:backgroundTint="#B0BEC5"
+                android:fontFamily="sans-serif-medium"
+                android:text="Bills"
+                android:textColor="#FFFFFF"
+                android:textSize="14sp" />
+
+            <Button
+                android:id="@+id/expense_transport_button"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:layout_marginEnd="4dp"
+                android:minWidth="100dp"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:backgroundTint="#B0BEC5"
+                android:fontFamily="sans-serif-medium"
+                android:text="Transport"
+                android:textColor="#FFFFFF"
+                android:textSize="14sp" />
+
+            <Button
+                android:id="@+id/expense_entertainment_button"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:layout_marginEnd="4dp"
+                android:minWidth="100dp"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:backgroundTint="#B0BEC5"
+                android:fontFamily="sans-serif-medium"
+                android:text="Entertainment"
+                android:textColor="#FFFFFF"
+                android:textSize="14sp" />
+
+            <Button
+                android:id="@+id/expense_other_button"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:layout_marginEnd="4dp"
+                android:minWidth="100dp"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:backgroundTint="#B0BEC5"
+                android:fontFamily="sans-serif-medium"
+                android:text="Other"
+                android:textColor="#FFFFFF"
+                android:textSize="14sp" />
+        </LinearLayout>
+    </HorizontalScrollView>
+
     <!-- RecyclerView for Transaction List -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/transactions_recycler_view"
@@ -32,6 +282,6 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/title_text" />
+        app:layout_constraintTop_toBottomOf="@id/expense_category_scroll" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
