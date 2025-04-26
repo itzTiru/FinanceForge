@@ -5,7 +5,6 @@
     android:layout_height="match_parent"
     android:background="#FFFFFF">
 
-    <!-- Header with User Greeting -->
     <TextView
         android:id="@+id/greeting_text"
         android:layout_width="wrap_content"
@@ -68,7 +67,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:fontFamily="sans-serif-light"
-                android:text="Budget: $500 / $1000"
+                android:text="Budget: $22950 / $50000"
                 android:textColor="#B0BEC5"
                 android:textSize="14sp" />
         </LinearLayout>
@@ -162,7 +161,7 @@
                 android:layout_marginTop="4dp"
                 android:fontFamily="sans-serif-light"
                 android:text="Send"
-                android:textColor="#B0BEC5"
+                android:textColor="#000000"
                 android:textSize="12sp" />
         </LinearLayout>
 
@@ -189,7 +188,7 @@
                 android:layout_marginTop="4dp"
                 android:fontFamily="sans-serif-light"
                 android:text="Pay"
-                android:textColor="#B0BEC5"
+                android:textColor="#000000"
                 android:textSize="12sp" />
         </LinearLayout>
 
@@ -216,7 +215,7 @@
                 android:layout_marginTop="4dp"
                 android:fontFamily="sans-serif-light"
                 android:text="Recharge"
-                android:textColor="#B0BEC5"
+                android:textColor="#000000"
                 android:textSize="12sp" />
         </LinearLayout>
 
@@ -243,27 +242,28 @@
                 android:layout_marginTop="4dp"
                 android:fontFamily="sans-serif-light"
                 android:text="Electricity"
-                android:textColor="#B0BEC5"
+                android:textColor="#000000"
                 android:textSize="12sp" />
         </LinearLayout>
     </LinearLayout>
 
     <!-- Transactions Section -->
+
+    <!-- Transactions List Placeholder (RecyclerView will be added in Kotlin) -->
     <TextView
         android:id="@+id/transactions_label"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="28dp"
         android:fontFamily="sans-serif-medium"
-        android:text="Transactions"
+        android:text=" Recent Transactions"
         android:textColor="#333333"
         android:textSize="18sp"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/quick_actions" />
 
-    <!-- Transactions List Placeholder (RecyclerView will be added in Kotlin) -->
     <ScrollView
         android:id="@+id/transactions_scroll_view"
         android:layout_width="0dp"
@@ -337,6 +337,117 @@
                     android:textColor="#333333"
                     android:textSize="16sp" />
             </LinearLayout>
+
+            <!-- Sample Transaction 2 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:orientation="horizontal"
+                android:padding="8dp">
+
+                <ImageView
+                    android:id="@+id/transaction_icon_2"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:background="@drawable/circle_light_blue"
+                    android:contentDescription="Transaction Icon"
+                    android:padding="8dp"
+                    android:src="@drawable/ic_transaction"
+                    app:tint="#3F51B5" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/transaction_title_2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="sans-serif-medium"
+                        android:text="Utilities"
+                        android:textColor="#333333"
+                        android:textSize="16sp" />
+
+                    <TextView
+                        android:id="@+id/transaction_date_2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:fontFamily="sans-serif-light"
+                        android:text="02 May - 14 Apr"
+                        android:textColor="#B0BEC5"
+                        android:textSize="14sp" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/transaction_amount_2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="sans-serif-medium"
+                    android:text="- $150"
+                    android:textColor="#333333"
+                    android:textSize="16sp" />
+            </LinearLayout>
+
+            <!-- Sample Transaction 3 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:orientation="horizontal"
+                android:padding="8dp">
+
+                <ImageView
+                    android:id="@+id/transaction_icon_3"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:background="@drawable/circle_light_blue"
+                    android:contentDescription="Transaction Icon"
+                    android:padding="8dp"
+                    android:src="@drawable/ic_transaction"
+                    app:tint="#3F51B5" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/transaction_title_3"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="sans-serif-medium"
+                        android:text="Salary"
+                        android:textColor="#333333"
+                        android:textSize="16sp" />
+
+                    <TextView
+                        android:id="@+id/transaction_date_3"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:fontFamily="sans-serif-light"
+                        android:text="01 May - 01 Apr"
+                        android:textColor="#B0BEC5"
+                        android:textSize="14sp" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/transaction_amount_3"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="sans-serif-medium"
+                    android:text="+ $5000"
+                    android:textColor="#333333"
+                    android:textSize="16sp" />
+            </LinearLayout>
+
         </LinearLayout>
     </ScrollView>
 
