@@ -2,6 +2,7 @@ package com.example.financetracker
 
 import android.app.DatePickerDialog
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
@@ -24,6 +25,9 @@ data class Income(val amount: String, val category: String, val date: String, va
 class AddIncomeActivity : AppCompatActivity() {
 
     private val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+    private var isEditMode = false
+    private var editPosition = -1
+    private var editIncome: Income? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,6 +35,7 @@ class AddIncomeActivity : AppCompatActivity() {
 
         // References to UI elements
         val exitButton: ImageButton = findViewById(R.id.exit_button)
+        val titleText: TextView = findViewById(R.id.title_text)
         val amountInput: TextInputEditText = findViewById(R.id.amount_input)
         val categoryDropdown: AutoCompleteTextView = findViewById(R.id.category_dropdown)
         val dateInput: TextInputEditText = findViewById(R.id.date_input)
@@ -43,9 +48,28 @@ class AddIncomeActivity : AppCompatActivity() {
         val sharedPreferences = getSharedPreferences("IncomePrefs", Context.MODE_PRIVATE)
         val editor = sharedPreferences.edit()
 
-        // Set default date to today
-        val today = Calendar.getInstance()
-        dateInput.setText(dateFormat.format(today.time))
+        // Check for edit mode
+        intent.extras?.let { extras ->
+            if (extras.containsKey("income") && extras.containsKey("position")) {
+                isEditMode = true
+                editPosition = extras.getInt("position", -1)
+                editIncome = Json.decodeFromString<Income>(extras.getString("income") ?: return@let)
+                titleText.text = "Edit Income"
+                saveButton.text = "Update Income"
+                editIncome?.let { income ->
+                    amountInput.setText(income.amount)
+                    categoryDropdown.setText(income.category, false)
+                    dateInput.setText(income.date)
+                    descriptionInput.setText(income.description ?: "")
+                }
+            }
+        }
+
+        // Set default date to today if not in edit mode
+        if (!isEditMode) {
+            val today = Calendar.getInstance()
+            dateInput.setText(dateFormat.format(today.time))
+        }
 
         // Set up DatePickerDialog
         val datePickerDialog = DatePickerDialog(
@@ -55,9 +79,9 @@ class AddIncomeActivity : AppCompatActivity() {
                 selectedDate.set(year, month, dayOfMonth)
                 dateInput.setText(dateFormat.format(selectedDate.time))
             },
-            today.get(Calendar.YEAR),
-            today.get(Calendar.MONTH),
-            today.get(Calendar.DAY_OF_MONTH)
+            Calendar.getInstance().get(Calendar.YEAR),
+            Calendar.getInstance().get(Calendar.MONTH),
+            Calendar.getInstance().get(Calendar.DAY_OF_MONTH)
         )
 
         // Show DatePickerDialog when date input or calendar icon is clicked
@@ -98,7 +122,7 @@ class AddIncomeActivity : AppCompatActivity() {
 
         // Handle Exit button click
         exitButton.setOnClickListener {
-            finish() // Close the activity and return to Dashboard
+            finish()
         }
 
         // Set up the category dropdown (income-specific categories)
@@ -106,47 +130,39 @@ class AddIncomeActivity : AppCompatActivity() {
         val adapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, categories)
         categoryDropdown.setAdapter(adapter)
 
-        // Configure the AutoCompleteTextView to show the dropdown on click
+        // Configure the AutoCompleteTextView to show the dropdown
         categoryDropdown.setOnClickListener {
             categoryDropdown.showDropDown()
         }
-
-        // Optional: Show dropdown when the user focuses on the field
         categoryDropdown.setOnFocusChangeListener { _, hasFocus ->
             if (hasFocus) {
                 categoryDropdown.showDropDown()
             }
         }
 
-        // Handle Save button click
+        // Handle Saveundance button click
         saveButton.setOnClickListener {
             val amount = amountInput.text.toString()
             val category = categoryDropdown.text.toString()
             val date = dateInput.text.toString()
             val description = descriptionInput.text.toString().ifEmpty { null }
 
-            // Basic validation
+            // Validation
             if (amount.isEmpty() || category.isEmpty() || date.isEmpty()) {
                 successMessage.text = "Error: Please fill in all required fields"
                 successMessage.setTextColor(getColor(android.R.color.holo_red_dark))
                 return@setOnClickListener
             }
-
-            // Additional validation: Ensure the category is one of the predefined options
             if (!categories.contains(category)) {
                 successMessage.text = "Error: Please select a valid category"
                 successMessage.setTextColor(getColor(android.R.color.holo_red_dark))
                 return@setOnClickListener
             }
-
-            // Additional validation: Ensure amount is a valid positive number
             if (amount.toDoubleOrNull() == null || amount.toDouble() <= 0) {
                 successMessage.text = "Error: Please enter a valid positive number for amount"
                 successMessage.setTextColor(getColor(android.R.color.holo_red_dark))
                 return@setOnClickListener
             }
-
-            // Additional validation: Ensure date is valid
             try {
                 dateFormat.isLenient = false
                 dateFormat.parse(date)
@@ -156,18 +172,30 @@ class AddIncomeActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            // Add new income to the list
             val newIncome = Income(amount, category, date, description)
-            incomes.add(0, newIncome) // Add to the beginning for newest first
+            if (isEditMode) {
+                // Update existing income
+                if (editPosition >= 0 && editPosition < incomes.size) {
+                    incomes[editPosition] = newIncome
+                }
+                // Return updated income to TransactionsFragment
+                val resultIntent = Intent()
+                resultIntent.putExtra("updatedIncome", Json.encodeToString(newIncome))
+                resultIntent.putExtra("position", editPosition)
+                setResult(RESULT_OK, resultIntent)
+            } else {
+                // Add new income
+                incomes.add(0, newIncome)
+            }
 
-            // Save the updated incomes list to SharedPreferences
+            // Save the updated incomes list
             val incomesJson = Json.encodeToString(incomes)
             editor.putString("incomes", incomesJson)
             editor.apply()
 
-            // Display success message and updated income list
+            // Display success message
             val displayText = buildString {
-                append("Income added successfully\n\n")
+                append(if (isEditMode) "Income updated successfully\n\n" else "Income added successfully\n\n")
                 append("Recent Incomes:\n")
                 incomes.take(3).forEachIndexed { index, income ->
                     append("Income ${index + 1}:\n")
@@ -181,13 +209,17 @@ class AddIncomeActivity : AppCompatActivity() {
                 }
             }
             successMessage.text = displayText
-            successMessage.setTextColor(getColor(R.color.green)) // Match the green color used in the layout (#388E3C)
+            successMessage.setTextColor(getColor(R.color.green))
 
-            // Clear the input fields
-            amountInput.text?.clear()
-            categoryDropdown.text?.clear()
-            dateInput.setText(dateFormat.format(today.time)) // Reset to today's date
-            descriptionInput.text?.clear()
+            // Clear fields or finish in edit mode
+            if (isEditMode) {
+                finish()
+            } else {
+                amountInput.text?.clear()
+                categoryDropdown.text?.clear()
+                dateInput.setText(dateFormat.format(Calendar.getInstance().time))
+                descriptionInput.text?.clear()
+            }
         }
     }
 }

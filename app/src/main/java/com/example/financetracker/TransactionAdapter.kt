@@ -3,11 +3,15 @@ package com.example.financetracker
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
-class TransactionAdapter : RecyclerView.Adapter<TransactionAdapter.TransactionViewHolder>() {
+class TransactionAdapter(
+    private val onEditClick: (Transaction, Int) -> Unit,
+    private val onDeleteClick: (Transaction, Int) -> Unit
+) : RecyclerView.Adapter<TransactionAdapter.TransactionViewHolder>() {
 
     private var transactions: List<Transaction> = emptyList()
 
@@ -16,6 +20,8 @@ class TransactionAdapter : RecyclerView.Adapter<TransactionAdapter.TransactionVi
         val title: TextView = itemView.findViewById(R.id.transaction_title)
         val date: TextView = itemView.findViewById(R.id.transaction_date)
         val amount: TextView = itemView.findViewById(R.id.transaction_amount)
+        val editButton: ImageButton = itemView.findViewById(R.id.edit_button)
+        val deleteButton: ImageButton = itemView.findViewById(R.id.delete_button)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TransactionViewHolder {
@@ -34,7 +40,7 @@ class TransactionAdapter : RecyclerView.Adapter<TransactionAdapter.TransactionVi
                 val amountValue = income.amount.toDoubleOrNull() ?: 0.0
                 holder.amount.text = "+ $${String.format("%.2f", amountValue)}"
                 holder.amount.setTextColor(
-                    holder.itemView.context.getColor(R.color.green) // #388E3C
+                    holder.itemView.context.getColor(R.color.green)
                 )
                 holder.icon.setImageResource(R.drawable.ic_plus)
             }
@@ -45,16 +51,23 @@ class TransactionAdapter : RecyclerView.Adapter<TransactionAdapter.TransactionVi
                 val amountValue = expense.amount.toDoubleOrNull() ?: 0.0
                 holder.amount.text = "- $${String.format("%.2f", amountValue)}"
                 holder.amount.setTextColor(
-                    holder.itemView.context.getColor(R.color.red) // #D32F2F
+                    holder.itemView.context.getColor(R.color.red)
                 )
                 holder.icon.setImageResource(R.drawable.ic_minus)
             }
+        }
+
+        // Set click listeners for edit and delete buttons
+        holder.editButton.setOnClickListener {
+            onEditClick(transaction, position)
+        }
+        holder.deleteButton.setOnClickListener {
+            onDeleteClick(transaction, position)
         }
     }
 
     override fun getItemCount(): Int = transactions.size
 
-    // Function to update the transactions list and refresh the RecyclerView
     fun updateTransactions(newTransactions: List<Transaction>) {
         transactions = newTransactions
         notifyDataSetChanged()

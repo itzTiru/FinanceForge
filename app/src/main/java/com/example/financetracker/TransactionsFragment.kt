@@ -1,28 +1,62 @@
 package com.example.financetracker
 
+import android.app.Activity
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.LinearLayout
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
 class TransactionsFragment : Fragment() {
 
     private lateinit var adapter: TransactionAdapter
-    private lateinit var allTransactions: List<Transaction>
+    private lateinit var allTransactions: MutableList<Transaction>
     private var isShowingIncomes = false
     private var isShowingExpenses = false
     private var selectedIncomeCategory: String? = null
     private var selectedExpenseCategory: String? = null
     private var selectedIncomeButton: Button? = null
     private var selectedExpenseButton: Button? = null
+
+    // Activity result launchers
+    private val editIncomeLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            result.data?.let { data ->
+                val position = data.getIntExtra("position", -1)
+                val updatedIncome = Json.decodeFromString<Income>(data.getStringExtra("updatedIncome") ?: return@let)
+                if (position >= 0 && position < allTransactions.size) {
+                    allTransactions[position] = Transaction.IncomeTransaction(updatedIncome)
+                    updateSharedPreferences()
+                    applyFilter()
+                }
+            }
+        }
+    }
+
+    private val editExpenseLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            result.data?.let { data ->
+                val position = data.getIntExtra("position", -1)
+                val updatedExpense = Json.decodeFromString<Expense>(data.getStringExtra("updatedExpense") ?: return@let)
+                if (position >= 0 && position < allTransactions.size) {
+                    allTransactions[position] = Transaction.ExpenseTransaction(updatedExpense)
+                    updateSharedPreferences()
+                    applyFilter()
+                }
+            }
+        }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -33,7 +67,38 @@ class TransactionsFragment : Fragment() {
         // Initialize RecyclerView
         val recyclerView: RecyclerView = view.findViewById(R.id.transactions_recycler_view)
         recyclerView.layoutManager = LinearLayoutManager(context)
-        adapter = TransactionAdapter()
+        adapter = TransactionAdapter(
+            onEditClick = { transaction, position ->
+                when (transaction) {
+                    is Transaction.IncomeTransaction -> {
+                        val intent = Intent(context, AddIncomeActivity::class.java).apply {
+                            putExtra("income", Json.encodeToString(transaction.income))
+                            putExtra("position", position)
+                        }
+                        editIncomeLauncher.launch(intent)
+                    }
+                    is Transaction.ExpenseTransaction -> {
+                        val intent = Intent(context, AddExpenseActivity::class.java).apply {
+                            putExtra("expense", Json.encodeToString(transaction.expense))
+                            putExtra("position", position)
+                        }
+                        editExpenseLauncher.launch(intent)
+                    }
+                }
+            },
+            onDeleteClick = { transaction, position ->
+                AlertDialog.Builder(requireContext())
+                    .setTitle("Delete Transaction")
+                    .setMessage("Are you sure you want to delete this transaction?")
+                    .setPositiveButton("Delete") { _, _ ->
+                        allTransactions.removeAt(position)
+                        updateSharedPreferences()
+                        applyFilter()
+                    }
+                    .setNegativeButton("Cancel", null)
+                    .show()
+            }
+        )
         recyclerView.adapter = adapter
 
         // Filter Buttons
@@ -58,7 +123,7 @@ class TransactionsFragment : Fragment() {
         val expenseEntertainmentButton: Button = view.findViewById(R.id.expense_entertainment_button)
         val expenseOtherButton: Button = view.findViewById(R.id.expense_other_button)
 
-        // Load incomes from IncomePrefs
+        // Load incomes
         val incomePrefs = requireContext().getSharedPreferences("IncomePrefs", Context.MODE_PRIVATE)
         val incomesJson = incomePrefs.getString("incomes", null)
         val incomes: List<Income> = if (incomesJson != null) {
@@ -71,7 +136,7 @@ class TransactionsFragment : Fragment() {
             emptyList()
         }
 
-        // Load expenses from ExpensePrefs
+        // Load expenses
         val expensePrefs = requireContext().getSharedPreferences("ExpensePrefs", Context.MODE_PRIVATE)
         val expensesJson = expensePrefs.getString("expenses", null)
         val expenses: List<Expense> = if (expensesJson != null) {
@@ -84,60 +149,64 @@ class TransactionsFragment : Fragment() {
             emptyList()
         }
 
-        // Combine incomes and expenses into a single transaction list
+        // Combine transactions
         allTransactions = mutableListOf<Transaction>().apply {
             addAll(incomes.map { Transaction.IncomeTransaction(it) })
             addAll(expenses.map { Transaction.ExpenseTransaction(it) })
         }
 
-        // Sort by date (assuming date is in "DD/MM/YYYY" format)
+        // Sort by date
         allTransactions = allTransactions.sortedByDescending {
             when (it) {
                 is Transaction.IncomeTransaction -> parseDate(it.income.date)
                 is Transaction.ExpenseTransaction -> parseDate(it.expense.date)
             }
-        }
+        }.toMutableList()
 
-        // Initially show all transactions
+        // Show all transactions initially
         adapter.updateTransactions(allTransactions)
 
-        // Income Filter Button Click Listener
+        // Income Filter Button
         incomeFilterButton.setOnClickListener {
             isShowingIncomes = !isShowingIncomes
-            isShowingExpenses = false // Reset expenses filter
+            isShowingExpenses = false
             selectedExpenseCategory = null
+            selectedExpenseButton?.backgroundTintList = requireContext().getColorStateList(R.color.category_default)
             selectedExpenseButton = null
             updateFilter(incomeFilterButton, expensesFilterButton, incomeCategoryButtonsLayout, expenseCategoryButtonsLayout)
             resetCategoryButtons(expenseAllButton, expenseGroceriesButton, expenseBillsButton, expenseTransportButton, expenseEntertainmentButton, expenseOtherButton)
-            // Set "All" as default when activating Income filter
             if (isShowingIncomes) {
                 selectedIncomeCategory = null
                 selectedIncomeButton?.backgroundTintList = requireContext().getColorStateList(R.color.category_default)
                 selectedIncomeButton = incomeAllButton
                 incomeAllButton.backgroundTintList = requireContext().getColorStateList(R.color.green)
+            } else {
+                selectedIncomeButton = null
             }
             applyFilter()
         }
 
-        // Expenses Filter Button Click Listener
+        // Expenses Filter Button
         expensesFilterButton.setOnClickListener {
             isShowingExpenses = !isShowingExpenses
-            isShowingIncomes = false // Reset income filter
+            isShowingIncomes = false
             selectedIncomeCategory = null
+            selectedIncomeButton?.backgroundTintList = requireContext().getColorStateList(R.color.category_default)
             selectedIncomeButton = null
-            updateFilter(expensesFilterButton, incomeFilterButton, incomeCategoryButtonsLayout, expenseCategoryButtonsLayout)
+            updateFilter(expensesFilterButton, incomeFilterButton, expenseCategoryButtonsLayout, incomeCategoryButtonsLayout)
             resetCategoryButtons(incomeAllButton, incomeSalaryButton, incomeFreelanceButton, incomeGiftButton, incomeInvestmentButton, incomeOtherButton)
-            // Set "All" as default when activating Expenses filter
             if (isShowingExpenses) {
                 selectedExpenseCategory = null
                 selectedExpenseButton?.backgroundTintList = requireContext().getColorStateList(R.color.category_default)
                 selectedExpenseButton = expenseAllButton
                 expenseAllButton.backgroundTintList = requireContext().getColorStateList(R.color.red)
+            } else {
+                selectedExpenseButton = null
             }
             applyFilter()
         }
 
-        // Income Category Button Click Listeners
+        // Income Category Buttons
         val incomeButtons = listOf(
             incomeAllButton to null,
             incomeSalaryButton to "Salary",
@@ -156,7 +225,7 @@ class TransactionsFragment : Fragment() {
             }
         }
 
-        // Expense Category Button Click Listeners
+        // Expense Category Buttons
         val expenseButtons = listOf(
             expenseAllButton to null,
             expenseGroceriesButton to "Groceries",
@@ -178,7 +247,6 @@ class TransactionsFragment : Fragment() {
         return view
     }
 
-    // Helper function to parse date in "DD/MM/YYYY" format for sorting
     private fun parseDate(date: String): Long {
         return try {
             val parts = date.split("/")
@@ -186,57 +254,53 @@ class TransactionsFragment : Fragment() {
             val day = parts[0].toIntOrNull() ?: 0
             val month = parts[1].toIntOrNull() ?: 0
             val year = parts[2].toIntOrNull() ?: 0
-            // Convert to a comparable long value (YYYYMMDD)
             (year * 10000L + month * 100L + day).toLong()
         } catch (e: Exception) {
             0L
         }
     }
 
-    // Update button appearance and category buttons visibility based on filter state
     private fun updateFilter(
         selectedButton: Button,
         otherButton: Button,
-        incomeCategoryButtonsLayout: LinearLayout,
-        expenseCategoryButtonsLayout: LinearLayout
+        selectedCategoryLayout: LinearLayout,
+        otherCategoryLayout: LinearLayout
     ) {
         if (selectedButton.id == R.id.income_filter_button) {
             if (isShowingIncomes) {
                 selectedButton.backgroundTintList = requireContext().getColorStateList(R.color.green)
                 selectedButton.setTextColor(requireContext().getColor(android.R.color.white))
-                incomeCategoryButtonsLayout.visibility = View.VISIBLE
+                selectedCategoryLayout.visibility = View.VISIBLE
             } else {
                 selectedButton.backgroundTintList = requireContext().getColorStateList(android.R.color.transparent)
                 selectedButton.setTextColor(requireContext().getColor(R.color.green))
-                incomeCategoryButtonsLayout.visibility = View.GONE
+                selectedCategoryLayout.visibility = View.GONE
             }
             otherButton.backgroundTintList = requireContext().getColorStateList(android.R.color.transparent)
             otherButton.setTextColor(requireContext().getColor(R.color.red))
-            expenseCategoryButtonsLayout.visibility = View.GONE
+            otherCategoryLayout.visibility = View.GONE
         } else {
             if (isShowingExpenses) {
                 selectedButton.backgroundTintList = requireContext().getColorStateList(R.color.red)
                 selectedButton.setTextColor(requireContext().getColor(android.R.color.white))
-                expenseCategoryButtonsLayout.visibility = View.VISIBLE
+                selectedCategoryLayout.visibility = View.VISIBLE
             } else {
                 selectedButton.backgroundTintList = requireContext().getColorStateList(android.R.color.transparent)
                 selectedButton.setTextColor(requireContext().getColor(R.color.red))
-                expenseCategoryButtonsLayout.visibility = View.GONE
+                selectedCategoryLayout.visibility = View.GONE
             }
             otherButton.backgroundTintList = requireContext().getColorStateList(android.R.color.transparent)
             otherButton.setTextColor(requireContext().getColor(R.color.green))
-            incomeCategoryButtonsLayout.visibility = View.GONE
+            otherCategoryLayout.visibility = View.GONE
         }
     }
 
-    // Reset category buttons to default state
     private fun resetCategoryButtons(vararg buttons: Button) {
         buttons.forEach { button ->
             button.backgroundTintList = requireContext().getColorStateList(R.color.category_default)
         }
     }
 
-    // Apply the filter to the transactions list
     private fun applyFilter() {
         var filteredTransactions = when {
             isShowingIncomes -> allTransactions.filterIsInstance<Transaction.IncomeTransaction>()
@@ -244,7 +308,6 @@ class TransactionsFragment : Fragment() {
             else -> allTransactions
         }
 
-        // Apply category filter if applicable
         if (isShowingIncomes && selectedIncomeCategory != null) {
             filteredTransactions = filteredTransactions.filter {
                 (it as Transaction.IncomeTransaction).income.category == selectedIncomeCategory
@@ -256,5 +319,20 @@ class TransactionsFragment : Fragment() {
         }
 
         adapter.updateTransactions(filteredTransactions)
+    }
+
+    private fun updateSharedPreferences() {
+        val incomePrefs = requireContext().getSharedPreferences("IncomePrefs", Context.MODE_PRIVATE)
+        val expensePrefs = requireContext().getSharedPreferences("ExpensePrefs", Context.MODE_PRIVATE)
+        val incomeEditor = incomePrefs.edit()
+        val expenseEditor = expensePrefs.edit()
+
+        val incomes = allTransactions.filterIsInstance<Transaction.IncomeTransaction>().map { it.income }
+        val expenses = allTransactions.filterIsInstance<Transaction.ExpenseTransaction>().map { it.expense }
+
+        incomeEditor.putString("incomes", Json.encodeToString(incomes))
+        expenseEditor.putString("expenses", Json.encodeToString(expenses))
+        incomeEditor.apply()
+        expenseEditor.apply()
     }
 }
